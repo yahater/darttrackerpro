@@ -1,0 +1,1755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dart Scorer Pro</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Work+Sans:wght@400;500;600;700&display=swap');
+        
+        :root {
+            --bg-primary: #0a0e14;
+            --bg-secondary: #151a23;
+            --bg-elevated: #1e2530;
+            --accent-primary: #00d4aa;
+            --accent-secondary: #0099ff;
+            --text-primary: #ffffff;
+            --text-secondary: #8b95a8;
+            --text-muted: #4a5568;
+            --border: #2d3748;
+            --danger: #ff4757;
+            --warning: #ffa502;
+            --success: #00d4aa;
+            --cricket-open: #ffa502;
+            --cricket-closed: #00d4aa;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Work Sans', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* Typography */
+        h1, h2, h3, .display {
+            font-family: 'Bebas Neue', sans-serif;
+            letter-spacing: 0.05em;
+            font-weight: 400;
+        }
+        
+        /* Layout */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+        
+        .container.game-container {
+            padding: 0;
+            max-width: 100%;
+        }
+        
+        /* Screens */
+        .screen {
+            display: none;
+        }
+        
+        .screen.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Buttons */
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            font-family: 'Work Sans', sans-serif;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            transform: translate(-50%, -50%);
+            transition: width 0.4s, height 0.4s;
+        }
+        
+        .btn:active::before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: var(--bg-primary);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 212, 170, 0.3);
+        }
+        
+        .btn-secondary {
+            background: var(--bg-elevated);
+            color: var(--text-primary);
+            border: 2px solid var(--border);
+        }
+        
+        .btn-secondary:hover {
+            border-color: var(--accent-primary);
+            background: var(--bg-secondary);
+        }
+        
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(255, 71, 87, 0.3);
+        }
+        
+        .btn-sm {
+            padding: 0.375rem 0.75rem;
+            font-size: 0.75rem;
+        }
+        
+        .btn-lg {
+            padding: 1rem 2rem;
+            font-size: 1rem;
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        /* Cards */
+        .card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .card-header {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        /* Forms */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            text-transform: uppercase;
+            font-size: 0.875rem;
+            letter-spacing: 0.05em;
+        }
+        
+        input[type="text"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            background: var(--bg-elevated);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: 'Work Sans', sans-serif;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+        }
+        
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(0, 212, 170, 0.1);
+        }
+        
+        /* Player Setup */
+        .player-list {
+            display: grid;
+            gap: 1rem;
+        }
+        
+        .player-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: var(--bg-elevated);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+        }
+        
+        .player-number {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--accent-primary);
+            color: var(--bg-primary);
+            border-radius: 50%;
+            font-weight: 700;
+            font-size: 1.125rem;
+        }
+        
+        .player-name {
+            flex: 1;
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+        
+        .player-input {
+            flex: 1;
+        }
+        
+        /* Game Mode Selection */
+        .mode-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .mode-card {
+            background: var(--bg-elevated);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .mode-card:hover {
+            border-color: var(--accent-primary);
+            transform: translateY(-4px);
+        }
+        
+        .mode-card.selected {
+            border-color: var(--accent-primary);
+            background: rgba(0, 212, 170, 0.1);
+        }
+        
+        .mode-card .mode-name {
+            font-size: 1.5rem;
+            font-family: 'Bebas Neue', sans-serif;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+        
+        .mode-card .mode-desc {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+        
+        /* Options Grid */
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .option-card {
+            background: var(--bg-elevated);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-top: 0.5rem;
+        }
+        
+        input[type="checkbox"] {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            accent-color: var(--accent-primary);
+        }
+        
+        /* Game Board */
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            background: var(--bg-secondary);
+            margin-bottom: 0;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        .match-info {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .info-item {
+            text-align: center;
+        }
+        
+        .info-label {
+            font-size: 0.625rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.125rem;
+        }
+        
+        .info-value {
+            font-size: 1rem;
+            font-family: 'Bebas Neue', sans-serif;
+            color: var(--accent-primary);
+        }
+        
+        /* Players Board */
+        .players-board {
+            display: grid;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            position: sticky;
+            top: 45px;
+            z-index: 90;
+            background: var(--bg-primary);
+            padding: 0.5rem;
+        }
+        
+        .player-card {
+            background: var(--bg-secondary);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 0.75rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .player-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .player-card.active {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 30px rgba(0, 212, 170, 0.3);
+        }
+        
+        .player-card.active::before {
+            background: var(--accent-primary);
+            box-shadow: 0 0 20px var(--accent-primary);
+        }
+        
+        .player-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .player-name-display {
+            font-size: 1rem;
+            font-weight: 700;
+        }
+        
+        .player-darts {
+            display: flex;
+            gap: 0.25rem;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+        
+        .player-dart {
+            background: var(--bg-elevated);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            min-width: 40px;
+            text-align: center;
+        }
+        
+        .player-dart.filled {
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+        }
+        
+        .player-stats {
+            display: flex;
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-label {
+            font-size: 0.625rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .stat-value {
+            font-size: 1.75rem;
+            font-family: 'Bebas Neue', sans-serif;
+            line-height: 1;
+            margin-top: 0.125rem;
+        }
+        
+        .sets-legs {
+            display: flex;
+            gap: 0.75rem;
+        }
+        
+        .sets-legs .stat-value {
+            font-size: 1.25rem;
+        }
+        
+        /* Scoring Controls */
+        .scoring-controls {
+            padding: 0.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .control-buttons {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0.5rem;
+        }
+        
+        .control-buttons .btn {
+            padding: 0.5rem 0.25rem;
+            font-size: 0.75rem;
+        }
+        
+        /* Quick Score Input */
+        .quick-score-input {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .quick-score-input input {
+            flex: 1;
+            font-size: 1.5rem;
+            text-align: center;
+            font-family: 'Bebas Neue', sans-serif;
+            padding: 0.5rem;
+        }
+        
+        /* Dart Input Grid */
+        .dart-input-section {
+            margin-bottom: 0.75rem;
+        }
+        
+        .dart-inputs {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .dart-input-field {
+            position: relative;
+        }
+        
+        .dart-input-field label {
+            position: absolute;
+            top: -8px;
+            left: 12px;
+            background: var(--bg-elevated);
+            padding: 0 4px;
+            font-size: 0.75rem;
+        }
+        
+        /* Number Pad - 7 rows x 3 columns */
+        .number-pad {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 0.5rem;
+        }
+        
+        .number-pad .btn {
+            padding: 0.75rem;
+            font-size: 1.125rem;
+            font-family: 'Bebas Neue', sans-serif;
+        }
+        
+        /* Multiplier Buttons */
+        .multiplier-btns {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 1rem; /* adjust value as needed */
+        }
+        
+        .multiplier-btns .btn {
+            padding: 0.5rem;
+            font-size: 1rem;
+            font-family: 'Bebas Neue', sans-serif;
+        }
+        
+        /* Current Darts Display */
+        .current-darts {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .dart-display {
+            flex: 1;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            padding: 0.5rem;
+            text-align: center;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .dart-display.filled {
+            border-color: var(--accent-primary);
+            background: rgba(0, 212, 170, 0.1);
+        }
+        
+        .dart-value {
+            font-size: 1.5rem;
+            font-family: 'Bebas Neue', sans-serif;
+            color: var(--accent-primary);
+        }
+        
+        .dart-label {
+            font-size: 0.625rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            margin-bottom: 0.25rem;
+        }
+        
+        /* Action Buttons */
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+        }
+        
+        /* Cricket Board */
+        .cricket-board {
+            background: var(--bg-elevated);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 0.75rem;
+            margin: 0.5rem;
+            overflow-x: auto;
+            position: sticky;
+            top: 45px;
+            z-index: 85;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .cricket-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+        
+        .cricket-table th,
+        .cricket-table td {
+            padding: 1rem;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+        
+        .cricket-table th {
+            background: var(--bg-secondary);
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.25rem;
+            letter-spacing: 0.05em;
+        }
+        
+        .cricket-table td {
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+        
+        .cricket-table .number-cell {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.5rem;
+            background: var(--bg-secondary);
+        }
+        
+        .cricket-marks {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.5rem;
+        }
+        
+        .cricket-marks.closed {
+            color: var(--cricket-closed);
+        }
+        
+        .cricket-marks.open {
+            color: var(--cricket-open);
+        }
+        
+        .cricket-score {
+            color: var(--accent-primary);
+            font-family: 'Bebas Neue', sans-serif;
+        }
+        
+        /* Cricket Input */
+        .cricket-input {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .cricket-input .btn {
+            padding: 1.25rem 0.5rem;
+            font-size: 1.25rem;
+        }
+        
+        /* Winner Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.active {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .modal-content {
+            background: var(--bg-secondary);
+            border: 3px solid var(--accent-primary);
+            border-radius: 16px;
+            padding: 3rem;
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 0 50px rgba(0, 212, 170, 0.5);
+        }
+        
+        .modal-content h2 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .winner-name {
+            font-size: 4rem;
+            font-family: 'Bebas Neue', sans-serif;
+            margin-bottom: 2rem;
+            color: var(--accent-primary);
+            text-shadow: 0 0 20px rgba(0, 212, 170, 0.5);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .mode-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stat-value {
+                font-size: 1.5rem;
+            }
+            
+            .game-header {
+                flex-direction: row;
+                align-items: center;
+                top: 0;
+                border-radius: 0;
+                padding: 0.5rem;
+            }
+            
+            .players-board {
+                top: 45px;
+            }
+            
+            .cricket-board {
+                top: 45px;
+            }
+            
+            .match-info {
+                gap: 0.5rem;
+            }
+            
+            .info-value {
+                font-size: 0.875rem;
+            }
+        }
+        
+        /* Utility Classes */
+        .text-center {
+            text-align: center;
+        }
+        
+        .mb-1 { margin-bottom: 1rem; }
+        .mb-2 { margin-bottom: 2rem; }
+        .mt-1 { margin-top: 1rem; }
+        .mt-2 { margin-top: 2rem; }
+        
+        .flex {
+            display: flex;
+        }
+        
+        .gap-1 {
+            gap: 1rem;
+        }
+        
+        .justify-between {
+            justify-content: space-between;
+        }
+        
+        .items-center {
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Setup Screen -->
+        <div id="setupScreen" class="screen active">
+            <div class="card">
+                <h2 class="card-header" style="font-size: 2rem; text-align: center; background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Dart Scorer Pro</h2>
+                <h2 class="card-header">Player Setup</h2>
+                
+                <div class="form-group">
+                    <label>Number of Players (2-8)</label>
+                    <input type="number" id="numPlayers" min="2" max="8" value="2">
+                </div>
+                
+                <div id="playerInputs" class="player-list"></div>
+                
+                <button class="btn btn-secondary btn-lg mb-2" onclick="app.randomizeOrder()">
+                    🎲 Randomize Order
+                </button>
+                
+                <button class="btn btn-primary btn-lg" onclick="app.goToGameSetup()">
+                    Next: Game Setup →
+                </button>
+            </div>
+        </div>
+
+        <!-- Game Setup Screen -->
+        <div id="gameSetupScreen" class="screen">
+            <div class="card">
+                <h2 class="card-header">Game Mode</h2>
+                
+                <div class="mode-grid" id="modeGrid"></div>
+            </div>
+
+            <div class="card" id="x01Options" style="display: none;">
+                <h2 class="card-header">X01 Options</h2>
+                
+                <div class="options-grid">
+                    <div class="option-card">
+                        <label>Starting Score</label>
+                        <select id="startingScore">
+                            <option value="301">301</option>
+                            <option value="501" selected>501</option>
+                            <option value="701">701</option>
+                        </select>
+                    </div>
+                    
+                    <div class="option-card">
+                        <label>Double In</label>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="doubleIn">
+                            <span>Required to start scoring</span>
+                        </div>
+                    </div>
+                    
+                    <div class="option-card">
+                        <label>Double Out</label>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="doubleOut" checked>
+                            <span>Required to finish</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 class="card-header">Match Format</h2>
+                
+                <div class="options-grid">
+                    <div class="option-card">
+                        <label>Legs per Set</label>
+                        <input type="number" id="legsPerSet" min="1" max="15" value="3">
+                    </div>
+                    
+                    <div class="option-card">
+                        <label>Sets to Win</label>
+                        <input type="number" id="setsToWin" min="1" max="21" value="1">
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn btn-secondary btn-lg" onclick="app.backToSetup()">
+                    ← Back
+                </button>
+                <button class="btn btn-primary btn-lg" onclick="app.startMatch()">
+                    Start Match 🎯
+                </button>
+            </div>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="gameScreen" class="screen">
+            <div class="game-header">
+                <div class="match-info">
+                    <div class="info-item">
+                        <div class="info-label">Set</div>
+                        <div class="info-value" id="currentSet">1</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Leg</div>
+                        <div class="info-value" id="currentLeg">1</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Mode</div>
+                        <div class="info-value" id="gameMode">501</div>
+                    </div>
+                </div>
+                
+                <div class="flex gap-1">
+                    <button class="btn btn-secondary btn-sm" onclick="app.undoLastTurn()">
+                        ↶ Undo
+                    </button>
+                    <button class="btn btn-danger btn-sm" onclick="app.resetMatch()">
+                        Reset
+                    </button>
+                </div>
+            </div>
+
+            <div class="players-board" id="playersBoard"></div>
+
+            <div class="cricket-board" id="cricketBoard" style="display: none;"></div>
+
+            <div class="scoring-controls">
+                <!-- Control Buttons Row -->
+                <div class="control-buttons">
+                    <button class="btn btn-secondary" id="quickModeBtn" onclick="app.setScoringMode('quick')">Quick</button>
+                    <button class="btn btn-primary" id="detailedModeBtn" onclick="app.setScoringMode('detailed')">Dart by Dart</button>
+                    <button class="btn btn-secondary" onclick="app.addDartValue(0)">Miss</button>
+                    <button class="btn btn-danger" onclick="app.clearCurrentDarts()">Clear</button>
+                    <button class="btn btn-primary" onclick="app.submitTurn()">Confirm</button>
+                </div>
+
+                <!-- Quick Score Mode -->
+                <div id="quickScoreMode" style="display: none;">
+                    <div class="quick-score-input">
+                        <input type="number" id="quickScoreInput" min="0" max="180" placeholder="Score">
+                    </div>
+                </div>
+
+                <!-- Detailed Dart Mode -->
+                <div id="detailedScoreMode">
+                    <div id="x01Input" style="display: none;">
+                        <div class="multiplier-btns">
+                            <button class="btn btn-secondary" onclick="app.setMultiplier('S')">Single</button>
+                            <button class="btn btn-secondary" onclick="app.setMultiplier('D')">Double</button>
+                            <button class="btn btn-secondary" onclick="app.setMultiplier('T')">Triple</button>
+                        </div>
+
+                        <div class="number-pad">
+                            <button class="btn btn-secondary" onclick="app.addDartValue(1)">1</button>
+                            <button class="btn btn-secondary" onclick="app.addDartValue(2)">2</button>
+                            <button class="btn btn-secondary" onclick="app.addDartValue(3)">3</button>
+                            <button class="btn btn-secondary" onclick="app.addDartValue(4)">4</button>
+                            <button class="btn btn-secondary" onclick="app.addDartValue(5)">5</button>
+                            <button class="btn btn-secondary" onclick="app.addDartValue(6)">6</button>
+                            <button class="btn btn-secondary" onclick="app.addDartValue(7)">7</button>
+                            <button class="btn btn-secondary" onclick="app.addDartValue(8)">8</button>
+                            <button class="btn btn-secondary" onclick="app.addDartValue(9)">9</button>
+                            <button class="btn btn-secondary" onclick="app.addDartValue(10)">10</button>
+                            <button class="btn btn-secondary" onclick="app.addDartValue(11)">11</button>
+                            <button class="btn btn-secondary" onclick="app.addDartValue(12)">12</button>
+                            <button class="btn btn-secondary" onclick="app.addDartValue(13)">13</button>
+                            <button class="btn btn-secondary" onclick="app.addDartValue(14)">14</button>
+                            <button class="btn btn-secondary" onclick="app.addDartValue(15)">15</button>
+                            <button class="btn btn-secondary" onclick="app.addDartValue(16)">16</button>
+                            <button class="btn btn-secondary" onclick="app.addDartValue(17)">17</button>
+                            <button class="btn btn-secondary" onclick="app.addDartValue(18)">18</button>
+                            <button class="btn btn-secondary" onclick="app.addDartValue(19)">19</button>
+                            <button class="btn btn-secondary" onclick="app.addDartValue(20)">20</button>
+                            <button class="btn btn-secondary" onclick="app.addDartValue(25)">25</button>
+                        </div>
+                    </div>
+
+                    <div id="cricketInput" style="display: none;">
+                        <div class="cricket-input">
+                            <button class="btn btn-secondary" onclick="app.addCricketHit(15, 1)">15</button>
+                            <button class="btn btn-secondary" onclick="app.addCricketHit(16, 1)">16</button>
+                            <button class="btn btn-secondary" onclick="app.addCricketHit(17, 1)">17</button>
+                            <button class="btn btn-secondary" onclick="app.addCricketHit(18, 1)">18</button>
+                            <button class="btn btn-secondary" onclick="app.addCricketHit(19, 1)">19</button>
+                            <button class="btn btn-secondary" onclick="app.addCricketHit(20, 1)">20</button>
+                            <button class="btn btn-secondary" onclick="app.addCricketHit(25, 1)">Bull</button>
+                        </div>
+                        <div class="text-center" style="color: var(--text-secondary); padding: 0.5rem;">
+                            <small>Click once for single, twice for double, three times for triple</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Winner Modal -->
+    <div class="modal" id="winnerModal">
+        <div class="modal-content">
+            <h2>🏆 Winner! 🏆</h2>
+            <div class="winner-name" id="winnerName"></div>
+            <button class="btn btn-primary btn-lg" onclick="app.closeWinnerModal()">
+                New Match
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Main App State and Logic
+        const app = {
+            state: {
+                screen: 'setup',
+                players: [],
+                currentPlayerIndex: 0,
+                gameMode: null,
+                x01Config: {
+                    startingScore: 501,
+                    doubleIn: false,
+                    doubleOut: true
+                },
+                matchConfig: {
+                    legsPerSet: 3,
+                    setsToWin: 1
+                },
+                currentSet: 1,
+                currentLeg: 1,
+                currentDarts: [],
+                currentMultiplier: 'S',
+                scoringMode: 'detailed',
+                turnHistory: []
+            },
+
+            // Initialize
+            init() {
+                this.renderPlayerInputs();
+                this.renderGameModes();
+                
+                document.getElementById('numPlayers').addEventListener('change', () => {
+                    this.renderPlayerInputs();
+                });
+                
+                // Quick score input enter key
+                document.getElementById('quickScoreInput').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        this.submitQuickScore();
+                    }
+                });
+            },
+
+            // Screen Management
+            showScreen(screenName) {
+                document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+                document.getElementById(`${screenName}Screen`).classList.add('active');
+                this.state.screen = screenName;
+            },
+
+            // Player Setup
+            renderPlayerInputs() {
+                const numPlayers = parseInt(document.getElementById('numPlayers').value);
+                const container = document.getElementById('playerInputs');
+                
+                // Preserve existing player names
+                const currentNames = this.state.players.map(p => p.name);
+                
+                container.innerHTML = '';
+                
+                for (let i = 0; i < numPlayers; i++) {
+                    const playerDiv = document.createElement('div');
+                    playerDiv.className = 'player-item';
+                    playerDiv.innerHTML = `
+                        <div class="player-number">${i + 1}</div>
+                        <input type="text" class="player-input" id="player${i}" 
+                               placeholder="Player ${i + 1}" value="${currentNames[i] || ''}">
+                    `;
+                    container.appendChild(playerDiv);
+                }
+            },
+
+            randomizeOrder() {
+                const numPlayers = parseInt(document.getElementById('numPlayers').value);
+                const inputs = [];
+                
+                for (let i = 0; i < numPlayers; i++) {
+                    inputs.push(document.getElementById(`player${i}`));
+                }
+                
+                // Fisher-Yates shuffle
+                for (let i = inputs.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    const temp = inputs[i].value;
+                    inputs[i].value = inputs[j].value;
+                    inputs[j].value = temp;
+                }
+            },
+
+            goToGameSetup() {
+                const numPlayers = parseInt(document.getElementById('numPlayers').value);
+                const players = [];
+                
+                for (let i = 0; i < numPlayers; i++) {
+                    const nameInput = document.getElementById(`player${i}`);
+                    const name = nameInput.value.trim() || `Player ${i + 1}`;
+                    players.push({
+                        name: name,
+                        score: 0,
+                        legs: 0,
+                        sets: 0,
+                        dartsThrown: 0,
+                        cricketMarks: {
+                            15: 0, 16: 0, 17: 0, 18: 0, 19: 0, 20: 0, 25: 0
+                        },
+                        cricketScore: 0
+                    });
+                }
+                
+                this.state.players = players;
+                this.showScreen('gameSetup');
+            },
+
+            backToSetup() {
+                this.showScreen('setup');
+            },
+
+            // Game Mode Selection
+            renderGameModes() {
+                const modes = [
+                    { id: '501', name: '501', desc: 'Standard game' },
+                    { id: '301', name: '301', desc: 'Quick game' },
+                    { id: '701', name: '701', desc: 'Long game' },
+                    { id: 'cricket', name: 'Cricket', desc: 'Strategic scoring' },
+                    { id: 'clock', name: 'Around the Clock', desc: 'Hit 1-20 in order' }
+                ];
+                
+                const container = document.getElementById('modeGrid');
+                container.innerHTML = '';
+                
+                modes.forEach(mode => {
+                    const card = document.createElement('div');
+                    card.className = 'mode-card';
+                    card.innerHTML = `
+                        <div class="mode-name">${mode.name}</div>
+                        <div class="mode-desc">${mode.desc}</div>
+                    `;
+                    card.onclick = () => this.selectGameMode(mode.id);
+                    container.appendChild(card);
+                });
+            },
+
+            selectGameMode(modeId) {
+                this.state.gameMode = modeId;
+                
+                // Update UI
+                document.querySelectorAll('.mode-card').forEach(card => {
+                    card.classList.remove('selected');
+                });
+                event.target.closest('.mode-card').classList.add('selected');
+                
+                // Show/hide X01 options
+                const x01Options = document.getElementById('x01Options');
+                if (['301', '501', '701'].includes(modeId)) {
+                    x01Options.style.display = 'block';
+                    document.getElementById('startingScore').value = modeId;
+                } else {
+                    x01Options.style.display = 'none';
+                }
+            },
+
+            // Start Match
+            startMatch() {
+                if (!this.state.gameMode) {
+                    alert('Please select a game mode');
+                    return;
+                }
+                
+                // Get match config
+                this.state.x01Config.startingScore = parseInt(document.getElementById('startingScore').value);
+                this.state.x01Config.doubleIn = document.getElementById('doubleIn').checked;
+                this.state.x01Config.doubleOut = document.getElementById('doubleOut').checked;
+                this.state.matchConfig.legsPerSet = parseInt(document.getElementById('legsPerSet').value);
+                this.state.matchConfig.setsToWin = parseInt(document.getElementById('setsToWin').value);
+                
+                // Initialize players for the game mode
+                this.state.players.forEach(player => {
+                    if (['301', '501', '701'].includes(this.state.gameMode)) {
+                        player.score = this.state.x01Config.startingScore;
+                        player.doubledIn = !this.state.x01Config.doubleIn;
+                    } else if (this.state.gameMode === 'cricket') {
+                        player.cricketMarks = { 15: 0, 16: 0, 17: 0, 18: 0, 19: 0, 20: 0, 25: 0 };
+                        player.cricketScore = 0;
+                    } else if (this.state.gameMode === 'clock') {
+                        player.score = 1; // Current target number
+                    }
+                    player.dartsThrown = 0;
+                });
+                
+                this.state.currentPlayerIndex = 0;
+                this.state.currentSet = 1;
+                this.state.currentLeg = 1;
+                this.state.turnHistory = [];
+                this.state.currentDarts = [];
+                
+                this.showScreen('game');
+                this.updateGameDisplay();
+            },
+
+            // Game Display
+            updateGameDisplay() {
+                // Update header
+                document.getElementById('currentSet').textContent = this.state.currentSet;
+                document.getElementById('currentLeg').textContent = this.state.currentLeg;
+                document.getElementById('gameMode').textContent = this.getGameModeName();
+                
+                // Update players board
+                this.renderPlayersBoard();
+                
+                // Update cricket board if needed
+                if (this.state.gameMode === 'cricket') {
+                    this.renderCricketBoard();
+                }
+                
+                // Update input visibility
+                this.updateInputVisibility();
+            },
+
+            getGameModeName() {
+                const modes = {
+                    '301': '301',
+                    '501': '501',
+                    '701': '701',
+                    'cricket': 'Cricket',
+                    'clock': 'Clock'
+                };
+                return modes[this.state.gameMode] || this.state.gameMode;
+            },
+
+            renderPlayersBoard() {
+                const container = document.getElementById('playersBoard');
+                container.innerHTML = '';
+                
+                this.state.players.forEach((player, index) => {
+                    const isActive = index === this.state.currentPlayerIndex;
+                    const card = document.createElement('div');
+                    card.className = `player-card ${isActive ? 'active' : ''}`;
+                    
+                    // Get current darts for active player
+                    let dartsHtml = '';
+                    if (isActive) {
+                        dartsHtml = '<div class="player-darts">';
+                        for (let i = 0; i < 3; i++) {
+                            const dart = this.state.currentDarts[i];
+                            const filled = dart ? 'filled' : '';
+                            const display = dart ? dart.display : '-';
+                            dartsHtml += `<div class="player-dart ${filled}">${display}</div>`;
+                        }
+                        dartsHtml += '</div>';
+                    }
+                    
+                    let scoreDisplay = '';
+                    if (['301', '501', '701'].includes(this.state.gameMode)) {
+                        scoreDisplay = `
+                            <div class="stat">
+                                <div class="stat-label">Remaining</div>
+                                <div class="stat-value">${player.score}</div>
+                            </div>
+                        `;
+                    } else if (this.state.gameMode === 'cricket') {
+                        scoreDisplay = `
+                            <div class="stat">
+                                <div class="stat-label">Score</div>
+                                <div class="stat-value cricket-score">${player.cricketScore}</div>
+                            </div>
+                        `;
+                    } else if (this.state.gameMode === 'clock') {
+                        scoreDisplay = `
+                            <div class="stat">
+                                <div class="stat-label">Target</div>
+                                <div class="stat-value">${player.score}</div>
+                            </div>
+                        `;
+                    }
+                    
+                    card.innerHTML = `
+                        <div class="player-header">
+                            <div class="player-name-display">${player.name}</div>
+                            ${dartsHtml}
+                        </div>
+                        <div class="player-stats">
+                            ${scoreDisplay}
+                            <div class="sets-legs">
+                                <div class="stat">
+                                    <div class="stat-label">Sets</div>
+                                    <div class="stat-value">${player.sets}</div>
+                                </div>
+                                <div class="stat">
+                                    <div class="stat-label">Legs</div>
+                                    <div class="stat-value">${player.legs}</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    container.appendChild(card);
+                });
+            },
+
+            renderCricketBoard() {
+                const board = document.getElementById('cricketBoard');
+                board.style.display = 'block';
+                
+                const numbers = [20, 19, 18, 17, 16, 15, 25];
+                
+                let html = '<table class="cricket-table"><thead><tr><th>Number</th>';
+                this.state.players.forEach(player => {
+                    html += `<th>${player.name}</th>`;
+                });
+                html += '</tr></thead><tbody>';
+                
+                numbers.forEach(num => {
+                    html += `<tr><td class="number-cell">${num === 25 ? 'Bull' : num}</td>`;
+                    this.state.players.forEach(player => {
+                        const marks = player.cricketMarks[num];
+                        let display = '';
+                        if (marks === 1) display = '/';
+                        else if (marks === 2) display = 'X';
+                        else if (marks >= 3) display = '⭕';
+                        
+                        const isClosed = marks >= 3;
+                        html += `<td><span class="cricket-marks ${isClosed ? 'closed' : 'open'}">${display}</span></td>`;
+                    });
+                    html += '</tr>';
+                });
+                
+                html += '</tbody></table>';
+                board.innerHTML = html;
+            },
+
+            updateInputVisibility() {
+                const x01Input = document.getElementById('x01Input');
+                const cricketInput = document.getElementById('cricketInput');
+                
+                if (['301', '501', '701', 'clock'].includes(this.state.gameMode)) {
+                    x01Input.style.display = 'block';
+                    cricketInput.style.display = 'none';
+                } else if (this.state.gameMode === 'cricket') {
+                    x01Input.style.display = 'none';
+                    cricketInput.style.display = 'block';
+                }
+            },
+
+            // Scoring Modes
+            setScoringMode(mode) {
+                this.state.scoringMode = mode;
+                
+                if (mode === 'quick') {
+                    document.getElementById('quickModeBtn').className = 'btn btn-primary';
+                    document.getElementById('detailedModeBtn').className = 'btn btn-secondary';
+                    document.getElementById('quickScoreMode').style.display = 'block';
+                    document.getElementById('detailedScoreMode').style.display = 'none';
+                } else {
+                    document.getElementById('quickModeBtn').className = 'btn btn-secondary';
+                    document.getElementById('detailedModeBtn').className = 'btn btn-primary';
+                    document.getElementById('quickScoreMode').style.display = 'none';
+                    document.getElementById('detailedScoreMode').style.display = 'block';
+                }
+            },
+
+            // Quick Score Entry
+            submitQuickScore() {
+                const input = document.getElementById('quickScoreInput');
+                const score = parseInt(input.value);
+                
+                if (isNaN(score) || score < 0 || score > 180) {
+                    alert('Please enter a valid score (0-180)');
+                    return;
+                }
+                
+                const player = this.state.players[this.state.currentPlayerIndex];
+                
+                // Save turn to history
+                this.state.turnHistory.push({
+                    playerIndex: this.state.currentPlayerIndex,
+                    darts: [],
+                    previousState: JSON.parse(JSON.stringify(player))
+                });
+                
+                if (['301', '501', '701'].includes(this.state.gameMode)) {
+                    this.processX01Score(score);
+                }
+                
+                input.value = '';
+            },
+
+            // Detailed Dart Entry
+            setMultiplier(mult) {
+                this.state.currentMultiplier = mult;
+                
+                // Update button styles
+                document.querySelectorAll('.multiplier-btns .btn').forEach(btn => {
+                    btn.className = 'btn btn-secondary';
+                });
+                event.target.className = 'btn btn-primary';
+            },
+
+            addDartValue(value) {
+                if (this.state.currentDarts.length >= 3) {
+                    return;
+                }
+                
+                const mult = this.state.currentMultiplier;
+                let score = 0;
+                let display = '';
+                
+                if (value === 0) {
+                    score = 0;
+                    display = 'Miss';
+                } else if (value === 25) {
+                    score = mult === 'D' ? 50 : 25;
+                    display = mult === 'D' ? 'Bull' : 'Bull-S';
+                } else {
+                    if (mult === 'S') {
+                        score = value;
+                        display = `S${value}`;
+                    } else if (mult === 'D') {
+                        score = value * 2;
+                        display = `D${value}`;
+                    } else if (mult === 'T') {
+                        score = value * 3;
+                        display = `T${value}`;
+                    }
+                }
+                
+                this.state.currentDarts.push({
+                    value: value,
+                    multiplier: mult,
+                    score: score,
+                    display: display
+                });
+                
+                this.updateGameDisplay();
+                
+                // Reset to single
+                this.state.currentMultiplier = 'S';
+                document.querySelectorAll('.multiplier-btns .btn').forEach(btn => {
+                    btn.className = 'btn btn-secondary';
+                });
+                document.querySelectorAll('.multiplier-btns .btn')[0].className = 'btn btn-primary';
+            },
+
+            addCricketHit(number, multiplier) {
+                if (this.state.currentDarts.length >= 3) {
+                    return;
+                }
+                
+                // Cycle through multipliers on repeated clicks
+                const lastDart = this.state.currentDarts[this.state.currentDarts.length - 1];
+                let newMultiplier = 1;
+                
+                if (lastDart && lastDart.value === number) {
+                    newMultiplier = (lastDart.multiplier % 3) + 1;
+                    this.state.currentDarts.pop(); // Remove last dart
+                }
+                
+                const display = number === 25 ? 
+                    (newMultiplier === 1 ? 'Bull-S' : newMultiplier === 2 ? 'Bull-D' : 'Bull-T') :
+                    (newMultiplier === 1 ? `S${number}` : newMultiplier === 2 ? `D${number}` : `T${number}`);
+                
+                this.state.currentDarts.push({
+                    value: number,
+                    multiplier: newMultiplier,
+                    score: 0,
+                    display: display
+                });
+                
+                this.updateGameDisplay();
+            },
+
+            clearCurrentDarts() {
+                this.state.currentDarts = [];
+                this.updateGameDisplay();
+            },
+
+            // Submit Turn (wrapper for both modes)
+            submitTurn() {
+                if (this.state.scoringMode === 'quick') {
+                    this.submitQuickScore();
+                } else {
+                    this.submitDetailedTurn();
+                }
+            },
+
+            // Detailed Turn
+            submitDetailedTurn() {
+                if (this.state.currentDarts.length === 0) {
+                    alert('Please enter at least one dart');
+                    return;
+                }
+                
+                const player = this.state.players[this.state.currentPlayerIndex];
+                
+                // Save turn to history
+                this.state.turnHistory.push({
+                    playerIndex: this.state.currentPlayerIndex,
+                    darts: [...this.state.currentDarts],
+                    previousState: JSON.parse(JSON.stringify(player))
+                });
+                
+                if (['301', '501', '701'].includes(this.state.gameMode)) {
+                    this.processX01Turn();
+                } else if (this.state.gameMode === 'cricket') {
+                    this.processCricketTurn();
+                } else if (this.state.gameMode === 'clock') {
+                    this.processClockTurn();
+                }
+                
+                this.clearCurrentDarts();
+            },
+
+            // X01 Game Logic
+            processX01Turn() {
+                const player = this.state.players[this.state.currentPlayerIndex];
+                const totalScore = this.state.currentDarts.reduce((sum, dart) => sum + dart.score, 0);
+                
+                // Check double-in requirement
+                if (this.state.x01Config.doubleIn && !player.doubledIn) {
+                    const hasDouble = this.state.currentDarts.some(dart => dart.multiplier === 'D' && dart.value !== 0);
+                    if (hasDouble) {
+                        player.doubledIn = true;
+                    } else {
+                        // Turn ends, no score
+                        this.nextPlayer();
+                        return;
+                    }
+                }
+                
+                if (!player.doubledIn) {
+                    this.nextPlayer();
+                    return;
+                }
+                
+                const newScore = player.score - totalScore;
+                
+                // Check for bust
+                if (newScore < 0 || (this.state.x01Config.doubleOut && newScore === 1)) {
+                    // Bust - no change
+                    this.nextPlayer();
+                    return;
+                }
+                
+                // Check for win
+                if (newScore === 0) {
+                    // Must finish on double if required
+                    const lastDart = this.state.currentDarts[this.state.currentDarts.length - 1];
+                    if (this.state.x01Config.doubleOut && lastDart.multiplier !== 'D') {
+                        // Bust - didn't finish on double
+                        this.nextPlayer();
+                        return;
+                    }
+                    
+                    // Win!
+                    player.score = 0;
+                    this.handleLegWin(this.state.currentPlayerIndex);
+                    return;
+                }
+                
+                // Valid score
+                player.score = newScore;
+                player.dartsThrown += this.state.currentDarts.length;
+                this.nextPlayer();
+            },
+
+            processX01Score(score) {
+                const player = this.state.players[this.state.currentPlayerIndex];
+                
+                if (!player.doubledIn && this.state.x01Config.doubleIn) {
+                    alert('Must double-in to start scoring');
+                    this.nextPlayer();
+                    return;
+                }
+                
+                const newScore = player.score - score;
+                
+                if (newScore < 0 || (this.state.x01Config.doubleOut && newScore === 1)) {
+                    this.nextPlayer();
+                    return;
+                }
+                
+                if (newScore === 0) {
+                    player.score = 0;
+                    this.handleLegWin(this.state.currentPlayerIndex);
+                    return;
+                }
+                
+                player.score = newScore;
+                player.dartsThrown += 3;
+                this.nextPlayer();
+            },
+
+            // Cricket Logic
+            processCricketTurn() {
+                const player = this.state.players[this.state.currentPlayerIndex];
+                
+                this.state.currentDarts.forEach(dart => {
+                    const number = dart.value;
+                    const hits = dart.multiplier;
+                    
+                    const currentMarks = player.cricketMarks[number];
+                    const newMarks = Math.min(currentMarks + hits, 3);
+                    player.cricketMarks[number] = newMarks;
+                    
+                    // If over 3, add to score if number is still open for opponents
+                    if (currentMarks >= 3) {
+                        const isOpenForOpponents = this.state.players.some((p, i) => 
+                            i !== this.state.currentPlayerIndex && p.cricketMarks[number] < 3
+                        );
+                        
+                        if (isOpenForOpponents) {
+                            player.cricketScore += (number === 25 ? 25 : number) * hits;
+                        }
+                    }
+                });
+                
+                player.dartsThrown += this.state.currentDarts.length;
+                
+                // Check for cricket win
+                this.checkCricketWin();
+                
+                this.nextPlayer();
+            },
+
+            checkCricketWin() {
+                const highestScore = Math.max(...this.state.players.map(p => p.cricketScore));
+                
+                this.state.players.forEach((player, index) => {
+                    const allClosed = [15, 16, 17, 18, 19, 20, 25].every(num => 
+                        player.cricketMarks[num] >= 3
+                    );
+                    
+                    if (allClosed && player.cricketScore >= highestScore) {
+                        this.handleLegWin(index);
+                    }
+                });
+            },
+
+            // Around the Clock Logic
+            processClockTurn() {
+                const player = this.state.players[this.state.currentPlayerIndex];
+                
+                this.state.currentDarts.forEach(dart => {
+                    if (dart.value === player.score) {
+                        player.score++;
+                        if (player.score > 20) {
+                            this.handleLegWin(this.state.currentPlayerIndex);
+                        }
+                    }
+                });
+                
+                player.dartsThrown += this.state.currentDarts.length;
+                this.nextPlayer();
+            },
+
+            // Win Handling
+            handleLegWin(playerIndex) {
+                const player = this.state.players[playerIndex];
+                player.legs++;
+                
+                // Check if set is won
+                const legsNeeded = Math.ceil(this.state.matchConfig.legsPerSet / 2) + 1;
+                if (player.legs >= legsNeeded) {
+                    this.handleSetWin(playerIndex);
+                } else {
+                    this.startNewLeg();
+                }
+            },
+
+            handleSetWin(playerIndex) {
+                const player = this.state.players[playerIndex];
+                player.sets++;
+                
+                // Check if match is won
+                if (player.sets >= this.state.matchConfig.setsToWin) {
+                    this.handleMatchWin(playerIndex);
+                } else {
+                    this.startNewSet();
+                }
+            },
+
+            handleMatchWin(playerIndex) {
+                const winner = this.state.players[playerIndex];
+                document.getElementById('winnerName').textContent = winner.name;
+                document.getElementById('winnerModal').classList.add('active');
+            },
+
+            closeWinnerModal() {
+                document.getElementById('winnerModal').classList.remove('active');
+                this.showScreen('setup');
+            },
+
+            // New Leg/Set
+            startNewLeg() {
+                this.state.currentLeg++;
+                
+                // Reset scores
+                this.state.players.forEach(player => {
+                    if (['301', '501', '701'].includes(this.state.gameMode)) {
+                        player.score = this.state.x01Config.startingScore;
+                        player.doubledIn = !this.state.x01Config.doubleIn;
+                    } else if (this.state.gameMode === 'cricket') {
+                        player.cricketMarks = { 15: 0, 16: 0, 17: 0, 18: 0, 19: 0, 20: 0, 25: 0 };
+                        player.cricketScore = 0;
+                    } else if (this.state.gameMode === 'clock') {
+                        player.score = 1;
+                    }
+                    player.dartsThrown = 0;
+                });
+                
+                this.updateGameDisplay();
+            },
+
+            startNewSet() {
+                this.state.currentSet++;
+                this.state.currentLeg = 1;
+                
+                // Reset leg scores
+                this.state.players.forEach(player => {
+                    player.legs = 0;
+                    if (['301', '501', '701'].includes(this.state.gameMode)) {
+                        player.score = this.state.x01Config.startingScore;
+                        player.doubledIn = !this.state.x01Config.doubleIn;
+                    } else if (this.state.gameMode === 'cricket') {
+                        player.cricketMarks = { 15: 0, 16: 0, 17: 0, 18: 0, 19: 0, 20: 0, 25: 0 };
+                        player.cricketScore = 0;
+                    } else if (this.state.gameMode === 'clock') {
+                        player.score = 1;
+                    }
+                    player.dartsThrown = 0;
+                });
+                
+                this.updateGameDisplay();
+            },
+
+            // Player Management
+            nextPlayer() {
+                this.state.currentPlayerIndex = (this.state.currentPlayerIndex + 1) % this.state.players.length;
+                this.updateGameDisplay();
+            },
+
+            // Undo
+            undoLastTurn() {
+                if (this.state.turnHistory.length === 0) {
+                    alert('No turns to undo');
+                    return;
+                }
+                
+                const lastTurn = this.state.turnHistory.pop();
+                this.state.players[lastTurn.playerIndex] = lastTurn.previousState;
+                this.state.currentPlayerIndex = lastTurn.playerIndex;
+                
+                this.updateGameDisplay();
+            },
+
+            // Reset
+            resetMatch() {
+                if (confirm('Are you sure you want to reset the match?')) {
+                    this.showScreen('setup');
+                }
+            }
+        };
+
+        // Initialize app on load
+        window.addEventListener('DOMContentLoaded', () => {
+            app.init();
+        });
+    </script>
+</body>
+</html>
